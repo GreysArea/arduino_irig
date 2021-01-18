@@ -17,10 +17,12 @@ struct irig_time_t {
 	uint8_t mins = 0;
 	uint8_t hours = 0;
 	uint16_t day_of_year = 0;
+	//uint8_t years = 0;
 	uint8_t tenths_of_secs = 0;
 	
 	void fixup();
 	void uptime();
+	//void setTime();
 	void add_ms(uint32_t tdiff_ms);
 	void add_s(uint32_t tdiff_s);
 	void add_m(uint16_t tdiff_m);

@@ -180,25 +180,38 @@ void IRIG_TX::send(irig_time_t tc) {
 	// SECONDS FRAME
 	to_bcd2(tc.secs, &bcd1, &bcd10);  
 	send_nibble(bcd1);
-	send_nibble(bcd10 << 1);
-	send_pos_ind();
-	
+	send_nibble(bcd10 << 1); // left shift to add the index marker (0b0)
+	send_pos_ind(); //P1
+	// Couldn't this all be replaced with:
+	//send_bcd9(tc.secs);
+
 	// MINUTES FRAME
-	send_bcd9(tc.mins);
+	send_bcd9(tc.mins); //	P2 (included in func)
 	
 	// HOURS FRAME
-	send_bcd9(tc.hours);
+	send_bcd9(tc.hours); // P3 (included in func)
 	
 	// DOY FRAME
 	to_bcd3(tc.day_of_year, &bcd1, &bcd10, &bcd100);
 	send_nibble(bcd1);
 	send_bit(0);
 	send_nibble(bcd10);
-	send_pos_ind();
+	send_pos_ind();		//	P4
 	send_nibble(bcd100);
 	send_bit(0);
+	//send_bit(0);
+	//send_bit(0);
+	//send_bit(0);
+	//send_bit(0);
+	//send_bit(0);
+	//send_bit(0);
+	//send_pos_ind(); //		P5
 
-	// TOS FRAME
+	// YEARS FRAME
+	//send_bcd9(tc.years);
+
+	// TOS FRAME - Not part of IRIG-B?
+	
 	send_nibble(tc.tenths_of_secs);
 	send_pos_ind();
 	
@@ -247,6 +260,7 @@ void irig_time_t::fixup() {
 }
 uint16_t irig_time_t::to_strn(char* str, uint16_t n) {
 	return snprintf(str, n, "%d:%d:%d.%d day %d", hours, mins, secs, tenths_of_secs, day_of_year);
+	//return snprintf(str, n, "%d:%d:%d day %d of year 20%d", hours, mins, secs, day_of_year, years);
 }
 void irig_time_t::uptime() {
 	uint64_t ms = millis();
@@ -260,6 +274,12 @@ void irig_time_t::uptime() {
 	ms -= secs * 1000;
 	tenths_of_secs = ms / 100;
 }
+/*
+void irig_time_t::setTime() {
+	
+}
+*/
+
 void irig_time_t::add_ms(uint32_t tdiff_ms) {
 	uint8_t amo = tdiff_ms % 100;
 	tenths_of_secs += amo / 10; tdiff_ms -= amo;
